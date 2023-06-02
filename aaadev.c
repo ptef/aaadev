@@ -6,6 +6,10 @@
 #include <linux/uaccess.h>
 #include <linux/fs.h>
 
+
+/*
+ * By changing this you choose how many devices to create
+ */
 #define MAX_DEV 2
 
 //#define MY_MAJOR       42
@@ -38,11 +42,16 @@ static struct chardev_data_t aaadev_data[MAX_DEV];
 
 /*
  * This is the bytes we're initially going to print.
- * TODO:
  * If the user writes a new 4-bytes array into the device, then we'll accept
  * and modify this array to the one received through write().
  */
 static char data[4] = { 'A', 'A', 'A', 'A' };
+
+/*
+ * Although this is manually defined, it can be easily changed to get the size
+ * automatically. But considering the purpose of the device I think it's safer
+ * to statically define it.
+ */
 static size_t datalen = 4;
 
 static int my_uevent(struct device *dev, struct kobj_uevent_env *env)
@@ -69,7 +78,7 @@ static int __init my_init(void)
 
         cdev_add(&aaadev_data[i].cdev, MKDEV(dev_major, i), 1);
 
-        device_create(aaadev_class, NULL, MKDEV(dev_major, i), NULL, "aaadev-%d", i);
+        device_create(aaadev_class, NULL, MKDEV(dev_major, i), NULL, "aaadev%d", i);
     }
 
     return 0;
@@ -133,15 +142,16 @@ static ssize_t my_read(struct file *file, char __user *buf, size_t count, loff_t
 static ssize_t my_write(struct file *file, const char __user *buf, size_t count, loff_t *offset)
 {
     static int printk_after_writes = 0;
-    size_t maxdatalen = datalen, ncopied = 0;
+    size_t maxdatalen = datalen;
+    size_t copy_success = 0;
 
     if (count < maxdatalen) {
         maxdatalen = count;
     }
 
-    ncopied = copy_from_user(data, buf, maxdatalen);
+   copy_success = copy_from_user(data, buf, maxdatalen);
 
-    if (ncopied == 0) {
+    if (copy_success == 0) {
         if (printk_after_writes < 2) { // I think it's stupid to force user to write() twice, anyways...
             printk_after_writes++;
         } else {
@@ -149,14 +159,14 @@ static ssize_t my_write(struct file *file, const char __user *buf, size_t count,
             printk_after_writes = 0;
         }
     } else {
-        printk("Could't copy %zd bytes from the user\n", ncopied);
+        printk("Could't copy %zd bytes from the user\n", copy_success);
     }
 
     return count;
 }
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Jean D'Elboux Diogo <push.rcx@gmail.com>");
+MODULE_AUTHOR("dukpt <j@bsd.com.br>");
 MODULE_DESCRIPTION("Print 0x41414141 characters");
 MODULE_VERSION("1.0");
 

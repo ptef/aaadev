@@ -7,14 +7,8 @@
 #LLVM_CONFIG = /opt/llvm/bin/llvm-config
 
 BINARY      := aaadev
-#KERNEL      := /lib/modules/$(shell uname -r)/build
-#KMOD_DIR    := $(shell pwd)
-ARCH        := x86_64
 CFLAGS      := -Wall -Wextra
 
-
-
-#OBJECTS := main.o
 
 obj-m += $(BINARY).o
 
