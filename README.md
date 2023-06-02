@@ -32,3 +32,5 @@ Pretty simple:
     $ cat /dev/aaadev0
     AAAAAAAAAAAAAAAAAAAAAAAAAA....
 
+# Credits   
+This project was created based on [Kernel Documentation](https://linux-kernel-labs.github.io/refs/heads/master/labs/device_drivers.html) and [Oleg Kutkov](https://olegkutkov.me/2018/03/14/simple-linux-character-device-driver/) blog.
