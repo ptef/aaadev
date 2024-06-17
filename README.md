@@ -34,9 +34,10 @@ The following commands can help you to discover your keys:
     mokutil --list-enrolled
     mokutil --list-new
 
-If you haven't your key already enrolled, you can use the following commands to (1) generate the pair and (2) import the public:
-    (1) openssl req -new -x509 -newkey rsa:4096 -keyout MOK.priv -outform DER -out MOK.der -nodes -days 36500 -subj "/CN=My Kernel Module Signing/"
-    (2) sudo mokutil --import MOK.der
+If you haven't your key already enrolled, you can use the following commands to (1) generate the pair and (2) import the public: 
+ 
+     openssl req -new -x509 -newkey rsa:4096 -keyout MOK.priv -outform DER -out MOK.der -nodes -days 36500 -subj "/CN=My Kernel Module Signing/"
+     sudo mokutil --import MOK.der
 
 After importing you'll must reboot your machine and enter the unlock password during the boot. Don't forget to choose the option to enroll the key you've just imported!
 
