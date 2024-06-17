@@ -12,6 +12,8 @@
  */
 #define MAX_DEV 2
 
+#define MODULE_NAME	"aaadev"
+
 //#define MY_MAJOR       42
 //#define MY_MAX_MINORS  5
 
@@ -54,7 +56,7 @@ static char data[4] = { 'A', 'A', 'A', 'A' };
  */
 static size_t datalen = 4;
 
-static int my_uevent(struct device *dev, struct kobj_uevent_env *env)
+static int my_uevent(const struct device *dev, struct kobj_uevent_env *env)
 {
     add_uevent_var(env, "DEVMODE=%#o", 0666);
     return 0;
@@ -69,7 +71,7 @@ static int __init my_init(void)
 
     dev_major = MAJOR(dev);
 
-    aaadev_class = class_create(THIS_MODULE, "aaadev");
+    aaadev_class = class_create(MODULE_NAME);
     aaadev_class->dev_uevent = my_uevent;
 
     for (i=0; i < MAX_DEV; i++) {
