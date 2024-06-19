@@ -41,6 +41,8 @@ local-vars-target:
 
 local: local-vars-target
 	make -C $(KERNEL_MODULES_PATH)/build M=$(PWD) modules
+	# if you don't have Secure Boot just delete the line below
+	$(KERNEL_SOURCES_PATH)/scripts/sign-file sha256 $(SEC_BOOT_PRIV_KEY) $(SEC_BOOT_PUB_KEY) $(PWD)/$(BINARY).ko
 
 
 local-clean: local-vars-target

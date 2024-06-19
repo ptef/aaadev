@@ -7,6 +7,7 @@
 #include <linux/kallsyms.h>
 #include <linux/kprobes.h>
 #include <linux/version.h>
+#include <linux/netfilter/nfnetlink.h>
 #include <linux/fs.h>
 
 
@@ -63,7 +64,7 @@ static size_t datalen = 4;
 /*
  * types for kernel function pointers
  */
-int (*sprint_symbol_ptr)(char *, unsigned long);
+//int (*sprint_symbol_ptr)(char *, unsigned long);
 unsigned long (*kallsyms_lookup_name_ptr)(char *);
 
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(6,0,0)
@@ -76,6 +77,10 @@ static int my_uevent(struct device *dev, struct kobj_uevent_env *env)
     return 0;
 }
 
+/*
+ * Thanks for the simple and nice trick
+ * https://nskernel.gitbook.io/kernel-play-guide/accessing-the-non-exported-in-modules
+ */
 static unsigned long lookup_kernel_function_addr(char *f_name) {
     struct kprobe kp;
     unsigned long addr;
@@ -116,21 +121,29 @@ static int __init my_init(void)
         device_create(aaadev_class, NULL, MKDEV(dev_major, i), NULL, "aaadev%d", i);
     }
 
-    // technique 1
-    kaddr = (unsigned long) &sprint_symbol;
-    //kaddr &= 0xffffffffff000000;
-    printk("AAADEV: JEAN: kaddr: %lx\n", kaddr);
+    /*
+     * technique 1 from TheXcellerator
+     * https://xcellerator.github.io/posts/linux_rootkits_11/
+     *
+     * NOT REQUIRED SINCE USING ANOTHER APPROACH NOW
+     * TBR NEXT
+     */
+    //kaddr = (unsigned long) &nfnetlink_send;
+    //printk("AAADEV: DUKPT1: kaddr: %lx\n", kaddr);
 
-    // technique 2 (prefered)
-    kaddr = lookup_kernel_function_addr("sprint_symbol");
-    printk("AAADEV: JEAN: kaddr: %lx\n", kaddr);
+    /*
+     *  technique 2 (prefered) - just example below
+     *
+     *  TBR NEXT
+     */
+    //kaddr = lookup_kernel_function_addr("nfnetlink_send");
+    //printk("AAADEV: DUKPT2: kaddr: %lx\n", kaddr);
 
-    kaddr = lookup_kernel_function_addr("kallsyms_lookup_name");
-    kallsyms_lookup_name_ptr = (unsigned long (*)(char *))kaddr;
+    kallsyms_lookup_name_ptr = (unsigned long (*)(char *))lookup_kernel_function_addr("kallsyms_lookup_name");
     if (kallsyms_lookup_name_ptr)
-	    printk("AAADEV: JEAN: kaddr: %p\n", kallsyms_lookup_name_ptr);
+	    printk("AAADEV: DUKPT4: kaddr: %lx\n", kallsyms_lookup_name_ptr);
     else
-	    printk(KERN_INFO "JEAN: no!\n");
+	    printk(KERN_INFO "DUKPT4: no!\n");
 
     return 0;
 }
